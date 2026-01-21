@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
+import { Dancing_Script } from 'next/font/google'
+
+const dancingScript = Dancing_Script({ subsets: ['latin'] })
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -32,7 +35,7 @@ export default function Header() {
               priority
             />
           </div>
-          <span className="text-xl font-bold text-cozinha-text">Cozinha Leve</span>
+          <span className={`${dancingScript.className} text-3xl font-bold text-cozinha-text-secondary`}>Cozinha Leve</span>
         </Link>
 
         {/* Desktop Navigation */}
