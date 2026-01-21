@@ -34,7 +34,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex h-screen w-full flex-col items-center justify-center bg-cozinha-bg px-4 pb-60 pt-16">
+    <div className="flex h-screen w-full flex-col items-center justify-center bg-cozinha-bg px-4 pb-60 pt-32">
       <div className="mb-14 flex flex-col items-center justify-center">
         <div className="relative mb-2 h-64 w-64">
           <Image 
@@ -52,8 +52,8 @@ export default function LoginPage() {
         </h2>
       </div>
 
-      <div className="w-full max-w-md rounded-3xl bg-cozinha-card p-8 shadow-lg">
-        <h1 className="mb-6 text-center text-3xl font-bold text-cozinha-text">Entrar</h1>
+      <div className="w-full max-w-md rounded-3xl bg-cozinha-card p-8 shadow-lg border border-cozinha-cta">
+        <h1 className="mb-6 text-center text-3xl font-bold text-cozinha-cta">Login</h1>
         
         {error && (
           <div className="mb-4 rounded bg-red-100 p-3 text-red-600">
@@ -63,29 +63,29 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Email</label>
+            <label className="mb-2 block text-lg font-medium text-gray-700">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded border border-gray-300 p-2 focus:border-cozinha-highlight focus:outline-none"
+              className="w-full rounded-xl border border-gray-300 p-3 text-lg focus:border-cozinha-highlight focus:outline-none"
               required
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Senha</label>
+            <label className="mb-2 block text-lg font-medium text-gray-700">Senha</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded border border-gray-300 p-2 focus:border-cozinha-highlight focus:outline-none"
+              className="w-full rounded-xl border border-gray-300 p-3 text-lg focus:border-cozinha-highlight focus:outline-none"
               required
             />
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded bg-cozinha-cta py-2 font-bold text-white transition hover:opacity-90 disabled:opacity-50"
+            className="w-full rounded-xl bg-cozinha-cta py-3 text-xl font-bold text-white transition hover:opacity-90 disabled:opacity-50"
           >
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
