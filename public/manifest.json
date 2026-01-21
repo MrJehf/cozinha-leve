@@ -1,19 +1,19 @@
 {
-  "name": "Cozinha Leve PWA",
-  "short_name": "CozinhaLeve",
-  "description": "Receitas leves e deliciosas",
+  "name": "Cozinha Leve",
+  "short_name": "Cozinha Leve",
+  "description": "Receitas saudáveis e práticas para o seu dia a dia.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#FFF8F4",
+  "theme_color": "#FFF8F4",
   "icons": [
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
