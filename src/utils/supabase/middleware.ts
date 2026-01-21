@@ -33,20 +33,48 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (request.nextUrl.pathname.startsWith('/admin') && !user) {
+  const path = request.nextUrl.pathname
+
+  // 1. Allow public access to login page
+  if (path === '/login') {
+    if (user) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+    return supabaseResponse
+  }
+
+  // 2. Block unauthenticated access to everything else
+  if (!user) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Check for admin role if user exists
-  if (request.nextUrl.pathname.startsWith('/admin') && user) {
-     const { data: profile } = await supabase
+  // 3. Authenticated Logic
+
+  // Root Redirect
+  if (path === '/') {
+    const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single()
-    
+
+    if (profile?.role === 'admin') {
+      return NextResponse.redirect(new URL('/admin', request.url))
+    } else {
+      return NextResponse.redirect(new URL('/receita', request.url))
+    }
+  }
+
+  // Admin Route Protection
+  if (path.startsWith('/admin')) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
     if (profile?.role !== 'admin') {
-         return NextResponse.redirect(new URL('/', request.url))
+      return NextResponse.redirect(new URL('/', request.url))
     }
   }
 

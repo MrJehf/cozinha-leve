@@ -27,7 +27,7 @@ export default function LoginPage() {
       setError(error.message)
       setLoading(false)
     } else {
-      router.push('/admin') // Redirect to admin or home
+      router.push('/') // Redirect to home (middleware handles role-based routing)
       router.refresh()
     }
   }
@@ -72,11 +72,6 @@ export default function LoginPage() {
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
-         <div className="mt-4 text-center">
-            <Link href="/" className="text-sm text-cozinha-cta hover:underline">
-              Voltar para a Home
-            </Link>
-          </div>
       </div>
     </div>
   )
