@@ -79,11 +79,17 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
     
     if (recipeId) {
       // Update
-      const { error: updateError } = await supabase
+      const { data, error: updateError } = await supabase
         .from('recipes')
         .update(dataToSave)
         .eq('id', recipeId)
+        .select()
+      
       error = updateError
+      
+      if (!error && (!data || data.length === 0)) {
+           error = { message: 'Nenhuma alteração realizada. Verifique se você tem permissão ou se a receita existe.' }
+      }
     } else {
       // Insert
       const { error: insertError } = await supabase
