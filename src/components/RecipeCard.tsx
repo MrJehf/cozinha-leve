@@ -1,10 +1,11 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Clock, Flame, Pencil, Trash2 } from 'lucide-react'
+import { Clock, Flame, Pencil, Trash2, Heart } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
-
+import { toggleFavorite, checkIsFavorite } from '@/app/actions/favorite-actions'
 
 // TODO: Define proper types
 interface Recipe {
@@ -20,11 +21,51 @@ interface Recipe {
 interface RecipeCardProps {
   recipe: Recipe
   isAdmin?: boolean
+  isFavorite?: boolean
+  hideBadge?: boolean
 }
 
-export default function RecipeCard({ recipe, isAdmin }: RecipeCardProps) {
+export default function RecipeCard({ recipe, isAdmin, isFavorite: initialIsFavorite = false, hideBadge = false }: RecipeCardProps) {
+  const [isFavorite, setIsFavorite] = useState(initialIsFavorite)
+  const [loadingFav, setLoadingFav] = useState(false)
   const supabase = createClient()
   const router = useRouter()
+
+  useEffect(() => {
+    // Determine if we should check the status. 
+    // If it was passed as true, we assume it's true.
+    // If false, it might just be unknown/default.
+    // We can check to be sure, especially if we are in a list where we didn't pre-fetch user favorites.
+    const checkStatus = async () => {
+      // If we are admin, no need to check favorites
+      if (isAdmin) return
+      
+      const status = await checkIsFavorite(String(recipe.id))
+      setIsFavorite(status)
+    }
+
+    checkStatus()
+  }, [recipe.id, isAdmin])
+
+  const handleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (loadingFav) return
+
+    // Optimistic UI
+    const previousState = isFavorite
+    setIsFavorite(!isFavorite)
+    setLoadingFav(true)
+
+    const res = await toggleFavorite(String(recipe.id))
+    
+    setLoadingFav(false)
+
+    if (!res.success) {
+      alert('Erro ao atualizar favoritos: ' + res.error)
+      setIsFavorite(previousState)
+    }
+  }
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault() // Prevent link navigation
@@ -63,10 +104,22 @@ export default function RecipeCard({ recipe, isAdmin }: RecipeCardProps) {
             )}
             
             {/* Highlight Badge */}
-            {recipe.is_highlight && (
+            {recipe.is_highlight && !hideBadge && (
               <div className="absolute top-2 right-2 rounded-full bg-cozinha-highlight px-3 py-1 text-xs font-bold text-white shadow-sm">
                 Destaque
               </div>
+            )}
+
+            {/* Favorite Button (Visible for non-admins usually, or everyone) */}
+            {!isAdmin && (
+                <button
+                    onClick={handleFavorite}
+                    disabled={loadingFav}
+                    className="absolute top-2 left-2 rounded-full bg-white/90 p-2 text-cozinha-cta shadow-sm hover:bg-white hover:scale-110 transition-all z-10 disabled:opacity-50"
+                    title={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                >
+                    <Heart size={18} className={isFavorite ? "fill-current" : ""} />
+                </button>
             )}
           </div>
 

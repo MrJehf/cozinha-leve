@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import rehypeSanitize from 'rehype-sanitize'
+import FavoriteButton from '@/components/FavoriteButton'
 
 export const revalidate = 60
 
@@ -62,15 +63,19 @@ export default async function RecipePage({
           <h1 className="text-3xl font-bold text-cozinha-text mb-2">{recipe.title}</h1>
           <p className="text-xl text-gray-500 mb-4">{recipe.subtitle}</p>
           
-          <div className="flex gap-4 border-y border-gray-200 py-4">
-            <div className="flex items-center gap-2 text-cozinha-text font-medium">
-              <Clock className="text-cozinha-highlight" />
-              <span>{recipe.prep_time}</span>
+          <div className="flex items-center justify-between border-y border-gray-200 py-4">
+            <div className="flex gap-6">
+                <div className="flex items-center gap-2 text-cozinha-text font-medium">
+                <Clock className="text-cozinha-highlight" />
+                <span>{recipe.prep_time}</span>
+                </div>
+                <div className="flex items-center gap-2 text-cozinha-text font-medium">
+                <Flame className="text-cozinha-cta" />
+                <span>{recipe.calories}</span>
+                </div>
             </div>
-             <div className="flex items-center gap-2 text-cozinha-text font-medium">
-              <Flame className="text-cozinha-cta" />
-              <span>{recipe.calories}</span>
-            </div>
+            
+            <FavoriteButton recipeId={recipe.id} />
           </div>
         </div>
 
