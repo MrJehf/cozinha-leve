@@ -8,15 +8,7 @@ import { createClient } from '@/utils/supabase/client'
 import { toggleFavorite, checkIsFavorite } from '@/app/actions/favorite-actions'
 
 // TODO: Define proper types
-interface Recipe {
-  id: string | number
-  title: string
-  subtitle?: string
-  thumbnail_url?: string
-  is_highlight?: boolean
-  prep_time?: string
-  calories?: string
-}
+import { Recipe } from '@/types'
 
 interface RecipeCardProps {
   recipe: Recipe
@@ -141,6 +133,16 @@ export default function RecipeCard({ recipe, isAdmin, isFavorite: initialIsFavor
                 <span>{recipe.calories}</span>
               </div>
             </div>
+
+            {recipe.tags && recipe.tags.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-1">
+                {recipe.tags.slice(0, 3).map((tag) => (
+                  <span key={tag.id} className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-700">
+                    {tag.name}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </Link>

@@ -5,6 +5,9 @@ import { createClient } from '@/utils/supabase/client'
 import { Plus, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
+// ... imports
+import { Tag } from '@/types'
+
 interface RecipeFormProps {
   initialData?: any
   recipeId?: string | number
@@ -27,6 +30,16 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
     is_highlight: false,
   })
   const [ingredients, setIngredients] = useState<string[]>([''])
+  const [availableTags, setAvailableTags] = useState<Tag[]>([])
+  const [selectedTags, setSelectedTags] = useState<number[]>([])
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      const { data } = await supabase.from('tags').select('*').order('name')
+      if (data) setAvailableTags(data)
+    }
+    fetchTags()
+  }, [])
 
   useEffect(() => {
     if (initialData) {
@@ -43,8 +56,23 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
       if (initialData.ingredients && Array.isArray(initialData.ingredients)) {
         setIngredients(initialData.ingredients.length > 0 ? initialData.ingredients : [''])
       }
+      
+      // Fetch existing tags for this recipe if editing
+      if (recipeId) {
+        const fetchRecipeTags = async () => {
+             const { data } = await supabase
+                .from('recipe_tags')
+                .select('tag_id')
+                .eq('recipe_id', recipeId)
+             
+             if (data) {
+                 setSelectedTags(data.map(rt => rt.tag_id))
+             }
+        }
+        fetchRecipeTags()
+      }
     }
-  }, [initialData])
+  }, [initialData, recipeId])
 
   const handleIngredientChange = (index: number, value: string) => {
     const newIngredients = [...ingredients]
@@ -62,6 +90,14 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
     setIngredients(newIngredients)
   }
 
+  const toggleTag = (tagId: number) => {
+      setSelectedTags(prev => 
+        prev.includes(tagId) 
+            ? prev.filter(id => id !== tagId)
+            : [...prev, tagId]
+      )
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -76,7 +112,8 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
     }
 
     let error
-    
+    let savedRecipeId = recipeId
+
     if (recipeId) {
       // Update
       const { data, error: updateError } = await supabase
@@ -92,10 +129,33 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
       }
     } else {
       // Insert
-      const { error: insertError } = await supabase
+      const { data, error: insertError } = await supabase
         .from('recipes')
         .insert([dataToSave])
+        .select()
+        
+      if (data && data[0]) {
+          savedRecipeId = data[0].id
+      }
       error = insertError
+    }
+
+    // Save Tags if recipe saved successfully
+    if (!error && savedRecipeId) {
+        // Delete existing tags first (simple approach)
+        if (recipeId) {
+            await supabase.from('recipe_tags').delete().eq('recipe_id', savedRecipeId)
+        }
+        
+        // Insert new tags
+        if (selectedTags.length > 0) {
+            const tagsToInsert = selectedTags.map(tagId => ({
+                recipe_id: savedRecipeId,
+                tag_id: tagId
+            }))
+            const { error: tagError } = await supabase.from('recipe_tags').insert(tagsToInsert)
+            if (tagError) console.error('Error saving tags:', tagError)
+        }
     }
 
     setLoading(false)
@@ -117,6 +177,7 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
           is_highlight: false,
         })
         setIngredients([''])
+        setSelectedTags([])
       }
       if (onSuccess) onSuccess()
       router.refresh()
@@ -259,6 +320,27 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
             className="h-4 w-4 rounded border-gray-300 text-cozinha-cta focus:ring-cozinha-cta"
           />
           <label htmlFor="highlight" className="text-sm text-gray-700">Destaque na Home</label>
+        </div>
+
+        {/* Tags Selection */}
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Tags / Categorias</label>
+            <div className="flex flex-wrap gap-2">
+                {availableTags.map(tag => (
+                    <button
+                        key={tag.id}
+                        type="button"
+                        onClick={() => toggleTag(tag.id)}
+                        className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
+                            selectedTags.includes(tag.id)
+                                ? 'bg-cozinha-cta text-white'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                    >
+                        {tag.name}
+                    </button>
+                ))}
+            </div>
         </div>
 
         <button

@@ -1,14 +1,57 @@
 import { createClient } from '@/utils/supabase/server'
 import RecipeCard from '@/components/RecipeCard'
+import SearchBar from '@/components/SearchBar'
+import TagFilter from '@/components/TagFilter'
+import { Suspense } from 'react'
 
 export const revalidate = 60 // Revalidate every minute
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; tag?: string }>
+}) {
+  const { q, tag } = await searchParams
   const supabase = await createClient()
-  const { data: recipes } = await supabase
+  
+  let query = supabase
     .from('recipes')
-    .select('*')
-    .order('created_at', { ascending: false })
+    .select('*, tags!inner(*)') // Use inner join if filtering by tag, otherwise left join is fine but we want to show tags anyway. 
+                                // Actually, if we filter by tag, we need inner join logic or special filter.
+                                // Supabase syntax for filtering by relation: .eq('tags.id', tagId) might not work directly on M-to-M easily without !inner.
+                                // For now let's just select tags.
+                                
+  // Efficient M-to-M filtering in Supabase/PostgREST usually requires:
+  // .eq('recipe_tags.tag_id', tag) but we are querying recipes.
+  // We can use !inner on the join if we want to filter ONLY recipes that have that tag.
+  
+  // Let's construct the query more carefully.
+  let basicQuery = supabase
+       .from('recipes')
+       .select('*, tags(*)')
+       .order('created_at', { ascending: false })
+
+  if (q) {
+      basicQuery = basicQuery.ilike('title', `%${q}%`)
+  }
+  
+  // Tag filtering needs to filter the PARENT (recipes) based on the CHILD (tags).
+  // In Supabase standard client:
+  if (tag) {
+     // This is the tricky part with M-to-M. 
+     // We can use !inner on the tags select to filter recipes that have at least one matching tag.
+     basicQuery = supabase
+       .from('recipes')
+       .select('*, tags!inner(*)')
+       .order('created_at', { ascending: false })
+       .eq('tags.id', tag)
+       
+     if (q) {
+         basicQuery = basicQuery.ilike('title', `%${q}%`)
+     }
+  }
+
+  const { data: recipes } = await basicQuery
   const { data: { user } } = await supabase.auth.getUser()
   
   let isAdmin = false
@@ -23,7 +66,7 @@ export default async function Home() {
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-12">
-      <section className="mb-12 text-center">
+      <section className="mb-8 text-center">
         <div className="mb-4 inline-block rounded-full bg-cozinha-soft/50 px-4 py-1.5 text-sm font-medium text-cozinha-cta">
           Receitas leves & deliciosas
         </div>
@@ -31,9 +74,21 @@ export default async function Home() {
           Sabor e saúde <br className="hidden sm:block" />
           <span className="text-cozinha-cta">na sua mesa todos os dias</span>
         </h1>
-        <p className="mx-auto max-w-2xl text-lg text-gray-600">
+        <p className="mx-auto mb-8 max-w-2xl text-lg text-gray-600">
           Descubra receitas práticas, nutritivas e saborosas pensadas para o seu bem-estar.
         </p>
+
+        <div className="flex flex-col items-center justify-center gap-4">
+          <Suspense>
+             <SearchBar />
+          </Suspense>
+        </div>
+      </section>
+
+      <section className="mb-8 p-1">
+        <Suspense>
+           <TagFilter />
+        </Suspense>
       </section>
 
       {recipes && recipes.length > 0 ? (

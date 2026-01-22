@@ -32,6 +32,33 @@ export default async function RecipePage({
       ? JSON.parse(recipe.ingredients) 
       : []
 
+// Helper to extract video ID and create embed URL
+  const getEmbedUrl = (url: string) => {
+    try {
+      if (!url) return ''
+      
+      // Handle already valid embed URLs
+      if (url.includes('/embed/')) return url
+
+      let videoId = ''
+      // Regex to match various YouTube formats including Shorts
+      const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
+      const match = url.match(youtubeRegex)
+
+      if (match && match[1]) {
+        videoId = match[1]
+        return `https://www.youtube.com/embed/${videoId}`
+      }
+      
+      return url
+    } catch (e) {
+      console.error('Error parsing video URL:', e)
+      return url
+    }
+  }
+
+  const embedUrl = getEmbedUrl(recipe.video_url)
+
   return (
     <div className="container mx-auto max-w-4xl pb-10">
       <div className="sticky top-16 z-10 bg-cozinha-bg/95 p-4 backdrop-blur-sm">
@@ -43,11 +70,9 @@ export default async function RecipePage({
 
       {/* Video Player */}
       <div className="bg-black aspect-video w-full sm:rounded-xl overflow-hidden shadow-lg mb-6">
-        {recipe.video_url ? (
-            // Assuming embeddable URL or use a smart component. 
-            // For MVP, iframe is safest if user provides embed URL.
+        {embedUrl ? (
             <iframe 
-                src={recipe.video_url} 
+                src={embedUrl}
                 className="w-full h-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
