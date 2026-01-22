@@ -43,6 +43,9 @@ export default function Header() {
           <Link href="/" className="text-cozinha-text hover:text-cozinha-cta transition font-medium">
             Home
           </Link>
+          <Link href="/receita" className="text-cozinha-text hover:text-cozinha-cta transition font-medium">
+            Receitas
+          </Link>
           <Link href="/admin" className="text-cozinha-text hover:text-cozinha-cta transition font-medium">
             Gerenciar
           </Link>
@@ -74,6 +77,13 @@ export default function Header() {
               className="px-4 py-2 hover:bg-cozinha-soft rounded-lg text-cozinha-text font-medium"
             >
               Home
+            </Link>
+            <Link 
+              href="/receita" 
+              onClick={() => setIsMenuOpen(false)}
+              className="px-4 py-2 hover:bg-cozinha-soft rounded-lg text-cozinha-text font-medium"
+            >
+              Receitas
             </Link>
             <Link 
               href="/admin" 

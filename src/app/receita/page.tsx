@@ -9,6 +9,17 @@ export default async function Home() {
     .from('recipes')
     .select('*')
     .order('created_at', { ascending: false })
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  let isAdmin = false
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    isAdmin = profile?.role === 'admin'
+  }
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-12">
@@ -28,7 +39,7 @@ export default async function Home() {
       {recipes && recipes.length > 0 ? (
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
+            <RecipeCard key={recipe.id} recipe={recipe} isAdmin={isAdmin} />
           ))}
         </div>
       ) : (
