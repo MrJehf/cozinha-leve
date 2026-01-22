@@ -2,6 +2,8 @@ import { createClient } from '@/utils/supabase/server'
 import { Clock, Flame, ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import ReactMarkdown from 'react-markdown'
+import rehypeSanitize from 'rehype-sanitize'
 
 export const revalidate = 60
 
@@ -94,8 +96,10 @@ export default async function RecipePage({
             <h2 className="text-xl font-bold text-cozinha-text mb-4 pb-2 border-b border-gray-100">
               Modo de Preparo
             </h2>
-            <div className="prose prose-stone text-gray-700 whitespace-pre-line">
-              {recipe.steps}
+            <div className="prose prose-stone max-w-none text-gray-700">
+              <ReactMarkdown rehypePlugins={[rehypeSanitize]}>
+                {recipe.steps}
+              </ReactMarkdown>
             </div>
           </div>
         </div>

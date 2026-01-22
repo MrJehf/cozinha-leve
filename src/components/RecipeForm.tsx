@@ -240,7 +240,7 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
 
         {/* Steps */}
          <div>
-          <label className="block text-sm font-medium text-gray-700">Modo de Preparo</label>
+          <label className="block text-sm font-medium text-gray-700">Modo de Preparo (Markdown suportado)</label>
           <textarea
             rows={6}
             className="mt-1 w-full rounded-md border border-gray-300 p-2 focus:border-cozinha-cta focus:outline-none"
