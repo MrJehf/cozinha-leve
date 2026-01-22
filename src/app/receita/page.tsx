@@ -66,7 +66,7 @@ export default async function Home({
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-12">
-      <section className="mb-8 text-center">
+      <section className="mb-2 text-center">
         <div className="mb-4 inline-block rounded-full bg-cozinha-soft/50 px-4 py-1.5 text-sm font-medium text-cozinha-cta">
           Receitas leves & deliciosas
         </div>
