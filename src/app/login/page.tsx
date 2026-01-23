@@ -70,6 +70,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-xl border border-gray-300 p-3 text-lg focus:border-cozinha-highlight focus:outline-none"
               required
+              suppressHydrationWarning
             />
           </div>
           <div>
@@ -80,6 +81,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-xl border border-gray-300 p-3 text-lg focus:border-cozinha-highlight focus:outline-none"
               required
+              suppressHydrationWarning
             />
           </div>
           <button

@@ -29,6 +29,7 @@ export default function SearchBar() {
         className="block w-full rounded-full border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-gray-700 shadow-sm transition placeholder:text-gray-400 focus:border-cozinha-cta focus:outline-none focus:ring-1 focus:ring-cozinha-cta"
         onChange={(e) => handleSearch(e.target.value)}
         defaultValue={searchParams.get('q')?.toString()}
+        suppressHydrationWarning
       />
     </div>
   )

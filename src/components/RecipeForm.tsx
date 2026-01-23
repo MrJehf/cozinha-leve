@@ -206,6 +206,7 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
             className="mt-1 w-full rounded-md border border-gray-300 p-2 focus:border-cozinha-cta focus:outline-none"
             value={formData.title}
             onChange={(e) => setFormData({...formData, title: e.target.value})}
+            suppressHydrationWarning
           />
         </div>
 
@@ -217,6 +218,7 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
             className="mt-1 w-full rounded-md border border-gray-300 p-2 focus:border-cozinha-cta focus:outline-none"
             value={formData.subtitle}
             onChange={(e) => setFormData({...formData, subtitle: e.target.value})}
+            suppressHydrationWarning
           />
         </div>
 
@@ -229,6 +231,7 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
               className="mt-1 w-full rounded-md border border-gray-300 p-2 focus:border-cozinha-cta focus:outline-none"
               value={formData.prep_time}
               onChange={(e) => setFormData({...formData, prep_time: e.target.value})}
+              suppressHydrationWarning
             />
           </div>
           <div>
@@ -239,6 +242,7 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
               className="mt-1 w-full rounded-md border border-gray-300 p-2 focus:border-cozinha-cta focus:outline-none"
               value={formData.calories}
               onChange={(e) => setFormData({...formData, calories: e.target.value})}
+              suppressHydrationWarning
             />
           </div>
         </div>
@@ -252,6 +256,7 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
             className="mt-1 w-full rounded-md border border-gray-300 p-2 focus:border-cozinha-cta focus:outline-none"
             value={formData.video_url}
             onChange={(e) => setFormData({...formData, video_url: e.target.value})}
+            suppressHydrationWarning
           />
           <p className="mt-1 text-xs text-gray-500">Use a URL de embed (ex: youtube.com/embed/ID)</p>
         </div>
@@ -262,6 +267,7 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
             className="mt-1 w-full rounded-md border border-gray-300 p-2 focus:border-cozinha-cta focus:outline-none"
             value={formData.thumbnail_url}
             onChange={(e) => setFormData({...formData, thumbnail_url: e.target.value})}
+            suppressHydrationWarning
           />
         </div>
 
@@ -277,6 +283,7 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
                   onChange={(e) => handleIngredientChange(idx, e.target.value)}
                   className="flex-1 rounded-md border border-gray-300 p-2 focus:border-cozinha-cta focus:outline-none"
                   placeholder={`Ingrediente ${idx + 1}`}
+                  suppressHydrationWarning
                 />
                 {ingredients.length > 1 && (
                   <button
@@ -318,6 +325,7 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
             checked={formData.is_highlight}
             onChange={(e) => setFormData({...formData, is_highlight: e.target.checked})}
             className="h-4 w-4 rounded border-gray-300 text-cozinha-cta focus:ring-cozinha-cta"
+            suppressHydrationWarning
           />
           <label htmlFor="highlight" className="text-sm text-gray-700">Destaque na Home</label>
         </div>

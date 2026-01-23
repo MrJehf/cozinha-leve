@@ -264,6 +264,7 @@ export default function UserList({ initialProfiles, hasServiceKey }: UserListPro
                                 className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-cozinha-cta focus:ring-1 focus:ring-cozinha-cta outline-none"
                                 value={currentUser.full_name || ''}
                                 onChange={e => setCurrentUser({...currentUser, full_name: e.target.value})}
+                                suppressHydrationWarning
                             />
                         </div>
 
@@ -277,6 +278,7 @@ export default function UserList({ initialProfiles, hasServiceKey }: UserListPro
                                 className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-cozinha-cta focus:ring-1 focus:ring-cozinha-cta outline-none disabled:bg-gray-100 disabled:text-gray-500"
                                 value={currentUser.email || ''}
                                 onChange={e => setCurrentUser({...currentUser, email: e.target.value})}
+                                suppressHydrationWarning
                             />
                         </div>
 
@@ -291,6 +293,7 @@ export default function UserList({ initialProfiles, hasServiceKey }: UserListPro
                                     className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-cozinha-cta focus:ring-1 focus:ring-cozinha-cta outline-none"
                                     value={password}
                                     onChange={e => setPassword(e.target.value)}
+                                    suppressHydrationWarning
                                 />
                                 <p className="text-xs text-gray-500 mt-1">Mínimo 6 caracteres</p>
                             </div>
