@@ -130,7 +130,7 @@ export default function RecipeCard({ recipe, isAdmin, isFavorite: initialIsFavor
               </div>
                <div className="flex items-center gap-1">
                 <Flame size={14} />
-                <span>{recipe.calories}</span>
+                <span>{recipe.calories} kcal</span>
               </div>
             </div>
 

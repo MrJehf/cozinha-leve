@@ -96,7 +96,7 @@ export default async function RecipePage({
                 </div>
                 <div className="flex items-center gap-2 text-cozinha-text font-medium">
                 <Flame className="text-cozinha-cta" />
-                <span>{recipe.calories}</span>
+                <span>{recipe.calories} kcal</span>
                 </div>
             </div>
             
