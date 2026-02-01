@@ -238,7 +238,7 @@ async function uploadRecipes(filePath: string) {
                 }
             } else if (newTag) {
                 tagId = newTag.id;
-                tagMap.set(tagKey, tagId);
+                tagMap.set(tagKey, newTag.id);
             }
         }
 
