@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+#Agent kit
+/.agent/
+
 # production
 /build
 
