@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Header from '@/components/Header'
+import BottomNav from '@/components/BottomNav'
 
 export default function ClientLayout({
   children,
@@ -22,9 +23,10 @@ export default function ClientLayout({
   return (
     <>
       <Header />
-      <main className="pt-20 min-h-screen pb-10">
+      <main className="pt-16 min-h-screen pb-24">
         {children}
       </main>
+      <BottomNav />
     </>
   )
 }
