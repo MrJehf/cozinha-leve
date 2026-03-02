@@ -134,11 +134,11 @@ export default function RecipeCard({ recipe, isAdmin, isFavorite: initialIsFavor
               </div>
             </div>
 
-            {recipe.tags && recipe.tags.length > 0 && (
+            {recipe.subcategories && recipe.subcategories.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-1">
-                {recipe.tags.slice(0, 3).map((tag) => (
-                  <span key={tag.id} className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-700">
-                    {tag.name}
+                {recipe.subcategories.slice(0, 3).map((sub) => (
+                  <span key={sub.id} className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-700">
+                    {sub.name}
                   </span>
                 ))}
               </div>

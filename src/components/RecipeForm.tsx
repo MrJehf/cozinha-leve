@@ -5,8 +5,7 @@ import { createClient } from '@/utils/supabase/client'
 import { Plus, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-// ... imports
-import { Tag } from '@/types'
+import { Category, Subcategory } from '@/types'
 
 interface RecipeFormProps {
   initialData?: any
@@ -30,15 +29,22 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
     is_highlight: false,
   })
   const [ingredients, setIngredients] = useState<string[]>([''])
-  const [availableTags, setAvailableTags] = useState<Tag[]>([])
-  const [selectedTags, setSelectedTags] = useState<number[]>([])
+  const [availableCategories, setAvailableCategories] = useState<Category[]>([])
+  const [availableSubcategories, setAvailableSubcategories] = useState<Subcategory[]>([])
+  const [selectedCategories, setSelectedCategories] = useState<number[]>([])
+  const [selectedSubcategories, setSelectedSubcategories] = useState<number[]>([])
 
   useEffect(() => {
-    const fetchTags = async () => {
-      const { data } = await supabase.from('tags').select('*').order('name')
-      if (data) setAvailableTags(data)
+    const fetchData = async () => {
+      // Fetch categories
+      const { data: cats } = await supabase.from('categories').select('*').order('name')
+      if (cats) setAvailableCategories(cats)
+
+      // Fetch subcategories
+      const { data: subs } = await supabase.from('subcategories').select('*').order('name')
+      if (subs) setAvailableSubcategories(subs)
     }
-    fetchTags()
+    fetchData()
   }, [])
 
   useEffect(() => {
@@ -57,19 +63,30 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
         setIngredients(initialData.ingredients.length > 0 ? initialData.ingredients : [''])
       }
       
-      // Fetch existing tags for this recipe if editing
+      // Fetch existing categories and subcategories for this recipe if editing
       if (recipeId) {
-        const fetchRecipeTags = async () => {
-             const { data } = await supabase
-                .from('recipe_tags')
-                .select('tag_id')
-                .eq('recipe_id', recipeId)
-             
-             if (data) {
-                 setSelectedTags(data.map(rt => rt.tag_id))
-             }
+        const fetchRecipeRelations = async () => {
+          // Fetch recipe categories
+          const { data: catData } = await supabase
+            .from('recipe_categories')
+            .select('category_id')
+            .eq('recipe_id', recipeId)
+          
+          if (catData) {
+            setSelectedCategories(catData.map(rc => rc.category_id))
+          }
+
+          // Fetch recipe subcategories
+          const { data: subData } = await supabase
+            .from('recipe_subcategories')
+            .select('subcategory_id')
+            .eq('recipe_id', recipeId)
+          
+          if (subData) {
+            setSelectedSubcategories(subData.map(rs => rs.subcategory_id))
+          }
         }
-        fetchRecipeTags()
+        fetchRecipeRelations()
       }
     }
   }, [initialData, recipeId])
@@ -90,12 +107,20 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
     setIngredients(newIngredients)
   }
 
-  const toggleTag = (tagId: number) => {
-      setSelectedTags(prev => 
-        prev.includes(tagId) 
-            ? prev.filter(id => id !== tagId)
-            : [...prev, tagId]
-      )
+  const toggleCategory = (categoryId: number) => {
+    setSelectedCategories(prev => 
+      prev.includes(categoryId) 
+        ? prev.filter(id => id !== categoryId)
+        : [...prev, categoryId]
+    )
+  }
+
+  const toggleSubcategory = (subcategoryId: number) => {
+    setSelectedSubcategories(prev => 
+      prev.includes(subcategoryId) 
+        ? prev.filter(id => id !== subcategoryId)
+        : [...prev, subcategoryId]
+    )
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -140,22 +165,33 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
       error = insertError
     }
 
-    // Save Tags if recipe saved successfully
+    // Save Categories and Subcategories if recipe saved successfully
     if (!error && savedRecipeId) {
-        // Delete existing tags first (simple approach)
-        if (recipeId) {
-            await supabase.from('recipe_tags').delete().eq('recipe_id', savedRecipeId)
-        }
-        
-        // Insert new tags
-        if (selectedTags.length > 0) {
-            const tagsToInsert = selectedTags.map(tagId => ({
-                recipe_id: savedRecipeId,
-                tag_id: tagId
-            }))
-            const { error: tagError } = await supabase.from('recipe_tags').insert(tagsToInsert)
-            if (tagError) console.error('Error saving tags:', tagError)
-        }
+      // Delete existing relations first (simple approach)
+      if (recipeId) {
+        await supabase.from('recipe_categories').delete().eq('recipe_id', savedRecipeId)
+        await supabase.from('recipe_subcategories').delete().eq('recipe_id', savedRecipeId)
+      }
+      
+      // Insert categories
+      if (selectedCategories.length > 0) {
+        const catsToInsert = selectedCategories.map(catId => ({
+          recipe_id: savedRecipeId,
+          category_id: catId
+        }))
+        const { error: catError } = await supabase.from('recipe_categories').insert(catsToInsert)
+        if (catError) console.error('Error saving categories:', catError)
+      }
+
+      // Insert subcategories
+      if (selectedSubcategories.length > 0) {
+        const subsToInsert = selectedSubcategories.map(subId => ({
+          recipe_id: savedRecipeId,
+          subcategory_id: subId
+        }))
+        const { error: subError } = await supabase.from('recipe_subcategories').insert(subsToInsert)
+        if (subError) console.error('Error saving subcategories:', subError)
+      }
     }
 
     setLoading(false)
@@ -177,7 +213,8 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
           is_highlight: false,
         })
         setIngredients([''])
-        setSelectedTags([])
+        setSelectedCategories([])
+        setSelectedSubcategories([])
       }
       if (onSuccess) onSuccess()
       router.refresh()
@@ -330,25 +367,46 @@ export default function RecipeForm({ initialData, recipeId, onSuccess }: RecipeF
           <label htmlFor="highlight" className="text-sm text-gray-700">Destaque na Home</label>
         </div>
 
-        {/* Tags Selection */}
+        {/* Categories Selection */}
         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Tags / Categorias</label>
-            <div className="flex flex-wrap gap-2">
-                {availableTags.map(tag => (
-                    <button
-                        key={tag.id}
-                        type="button"
-                        onClick={() => toggleTag(tag.id)}
-                        className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
-                            selectedTags.includes(tag.id)
-                                ? 'bg-cozinha-cta text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                    >
-                        {tag.name}
-                    </button>
-                ))}
-            </div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Categorias</label>
+          <div className="flex flex-wrap gap-2">
+            {availableCategories.map(cat => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => toggleCategory(cat.id)}
+                className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
+                  selectedCategories.includes(cat.id)
+                    ? 'bg-cozinha-cta text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Subcategories Selection */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Subcategorias</label>
+          <div className="flex flex-wrap gap-2">
+            {availableSubcategories.map(sub => (
+              <button
+                key={sub.id}
+                type="button"
+                onClick={() => toggleSubcategory(sub.id)}
+                className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
+                  selectedSubcategories.includes(sub.id)
+                    ? 'bg-cozinha-highlight text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {sub.name}
+              </button>
+            ))}
+          </div>
         </div>
 
         <button

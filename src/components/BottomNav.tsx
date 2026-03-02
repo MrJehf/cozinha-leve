@@ -25,7 +25,7 @@ export default function BottomNav() {
           <div className="absolute inset-0 rounded-full scale-[1.15] bg-cozinha-bg" />
           {/* Green logo circle */}
           <div className="relative flex items-center justify-center w-[68px] h-[68px] rounded-full bg-cozinha-highlight shadow-lg">
-            <div className="relative w-10 h-10">
+            <div className="relative w-14 h-14">
               <Image
                 src="/logo.svg"
                 alt="Cozinha Leve"

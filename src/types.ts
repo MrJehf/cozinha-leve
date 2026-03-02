@@ -1,6 +1,12 @@
-export interface Tag {
+export interface Subcategory {
   id: number;
   name: string;
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  subcategories?: Subcategory[];
 }
 
 export interface Recipe {
@@ -16,5 +22,9 @@ export interface Recipe {
   is_highlight?: boolean;
   created_at?: string;
   // Joins
-  tags?: Tag[];
+  categories?: Category[];
+  subcategories?: Subcategory[];
 }
+
+// Backward compat alias
+export type Tag = Subcategory;

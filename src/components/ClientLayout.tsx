@@ -22,8 +22,7 @@ export default function ClientLayout({
 
   return (
     <>
-      <Header />
-      <main className="pt-16 min-h-screen pb-24">
+      <main className="min-h-screen pb-24">
         {children}
       </main>
       <BottomNav />

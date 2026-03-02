@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import RecipeCard from '@/components/RecipeCard'
 import SearchBar from '@/components/SearchBar'
-import TagFilter from '@/components/TagFilter'
+import CategoryFilter from '@/components/CategoryFilter'
 import { Suspense } from 'react'
 
 export const revalidate = 60 // Revalidate every minute
@@ -9,46 +9,38 @@ export const revalidate = 60 // Revalidate every minute
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; tag?: string }>
+  searchParams: Promise<{ q?: string; category?: string; subcategory?: string }>
 }) {
-  const { q, tag } = await searchParams
+  const { q, category, subcategory } = await searchParams
   const supabase = await createClient()
   
-  let query = supabase
-    .from('recipes')
-    .select('*, tags!inner(*)') // Use inner join if filtering by tag, otherwise left join is fine but we want to show tags anyway. 
-                                // Actually, if we filter by tag, we need inner join logic or special filter.
-                                // Supabase syntax for filtering by relation: .eq('tags.id', tagId) might not work directly on M-to-M easily without !inner.
-                                // For now let's just select tags.
-                                
-  // Efficient M-to-M filtering in Supabase/PostgREST usually requires:
-  // .eq('recipe_tags.tag_id', tag) but we are querying recipes.
-  // We can use !inner on the join if we want to filter ONLY recipes that have that tag.
-  
-  // Let's construct the query more carefully.
-  let basicQuery = supabase
-       .from('recipes')
-       .select('*, tags(*)')
-       .order('created_at', { ascending: false })
+  // Build query based on filters
+  let basicQuery;
+
+  if (subcategory) {
+    // Filter by subcategory (most specific filter)
+    basicQuery = supabase
+      .from('recipes')
+      .select('*, categories(*), subcategories!inner(*)')
+      .eq('subcategories.id', subcategory)
+      .order('created_at', { ascending: false })
+  } else if (category) {
+    // Filter by category only
+    basicQuery = supabase
+      .from('recipes')
+      .select('*, categories!inner(*), subcategories(*)')
+      .eq('categories.id', category)
+      .order('created_at', { ascending: false })
+  } else {
+    // No filter — get all recipes with their categories and subcategories
+    basicQuery = supabase
+      .from('recipes')
+      .select('*, categories(*), subcategories(*)')
+      .order('created_at', { ascending: false })
+  }
 
   if (q) {
-      basicQuery = basicQuery.ilike('title', `%${q}%`)
-  }
-  
-  // Tag filtering needs to filter the PARENT (recipes) based on the CHILD (tags).
-  // In Supabase standard client:
-  if (tag) {
-     // This is the tricky part with M-to-M. 
-     // We can use !inner on the tags select to filter recipes that have at least one matching tag.
-     basicQuery = supabase
-       .from('recipes')
-       .select('*, tags!inner(*)')
-       .order('created_at', { ascending: false })
-       .eq('tags.id', tag)
-       
-     if (q) {
-         basicQuery = basicQuery.ilike('title', `%${q}%`)
-     }
+    basicQuery = basicQuery.ilike('title', `%${q}%`)
   }
 
   const { data: recipes } = await basicQuery
@@ -65,9 +57,9 @@ export default async function Home({
   }
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-12">
+    <div className="container mx-auto max-w-7xl px-4 py-4">
       <section className="mb-2 text-center">
-        <div className="mb-4 inline-block rounded-full bg-cozinha-soft/50 px-4 py-1.5 text-sm font-medium text-cozinha-cta">
+        <div className="mb-2 inline-block rounded-full bg-cozinha-soft/50 px-4 py-1.5 text-sm font-medium text-cozinha-cta">
           Receitas leves & deliciosas
         </div>
         <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-cozinha-text md:text-5xl lg:text-6xl">
@@ -87,7 +79,7 @@ export default async function Home({
 
       <section className="mb-8 p-1">
         <Suspense>
-           <TagFilter />
+           <CategoryFilter />
         </Suspense>
       </section>
 

@@ -38,7 +38,7 @@ interface RecipeCSV {
   calories: string;
   prep_time: string;
   steps: string;
-  tags: string[];
+  tags: string[]; // These map to subcategories now
 }
 
 // --- Supabase Client ---
@@ -62,26 +62,8 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 
 function parseCSV(filePath: string): RecipeCSV[] {
   const content = fs.readFileSync(filePath, 'utf-8');
-  // Normalize newlines to avoid issues with different OS encodings inside quoted strings
-  const lines = content.replace(/\r\n/g, '\n').split('\n').filter(line => line.trim() !== '');
-  
-  // Skip header
-  // Note: We need a more robust line splitter because the "Modo de Preparo" (Steps) can contain newlines inside quotes.
-  // The simple .split('\n') above breaks if there are newlines inside quotes.
-  
-  // Better approach: Parse the whole content string using regex
   
   const recipes: RecipeCSV[] = [];
-  
-  // Regex to match a full CSV line, handling quoted newlines.
-  // This is tricky. A better way manually iterating characters or using a library.
-  // Given we can't add libraries easily (no npm install allowed/easy), we stick to manual parsing or robust regex.
-  
-  // Basic Regex for Semicolon delimited: 
-  // Values are either quoted strings "..." OR non-semicolon strings.
-  // The global match won't work easily for lines. 
-  
-  // Let's assume the file is small enough to parse character by character.
   
   const parsedRows: string[][] = [];
   let currentRow: string[] = [];
@@ -104,19 +86,16 @@ function parseCSV(filePath: string): RecipeCSV[] {
       currentVal = '';
     } else if ((char === '\r' || char === '\n') && !inQuotes) {
       // End of line
-      // Handle CRLF or LF
       if (char === '\r' && nextChar === '\n') {
         i++;
       }
       
-      // Push last val
       currentRow.push(currentVal);
       currentVal = '';
       
       if (currentRow.length > 0) {
-        // Check if empty row
         if (currentRow.length === 1 && currentRow[0].trim() === '') {
-           // Skip empty lines
+          // Skip empty lines
         } else {
            parsedRows.push(currentRow);
         }
@@ -175,16 +154,16 @@ async function uploadRecipes(filePath: string) {
   const recipes = parseCSV(filePath);
   console.log(`found ${recipes.length} recipes to upload.`);
 
-  // 1. Fetch existing tags to avoid duplicate inserts or find IDs
-  const { data: existingTagsData, error: tagError } = await supabase.from('tags').select('id, name');
-  if (tagError) {
-    console.error('❌ Failed to fetch existing tags:', tagError.message);
+  // 1. Fetch existing subcategories (formerly tags) to avoid duplicate inserts or find IDs
+  const { data: existingSubsData, error: subError } = await supabase.from('subcategories').select('id, name');
+  if (subError) {
+    console.error('❌ Failed to fetch existing subcategories:', subError.message);
     process.exit(1);
   }
   
   // Map Name -> ID
-  const tagMap = new Map<string, number>();
-  existingTagsData?.forEach(tag => tagMap.set(tag.name.toLowerCase(), tag.id));
+  const subMap = new Map<string, number>();
+  existingSubsData?.forEach(sub => subMap.set(sub.name.toLowerCase(), sub.id));
 
   for (const recipe of recipes) {
     const { title, subtitle, ingredients, calories, prep_time, steps, tags } = recipe;
@@ -194,7 +173,7 @@ async function uploadRecipes(filePath: string) {
     // Insert Recipe
     const { data: insertedRecipe, error } = await supabase.from('recipes').insert({
       title,
-      subtitle, // New Field
+      subtitle,
       ingredients,
       calories,
       prep_time,
@@ -209,49 +188,43 @@ async function uploadRecipes(filePath: string) {
       continue;
     }
 
-    // Handle Tags
-    console.log(`   🏷️ Processing tags: ${tags.join(', ')}`);
+    // Handle Subcategories (formerly tags)
+    console.log(`   🏷️ Processing subcategories: ${tags.join(', ')}`);
     for (const tagName of tags) {
         const normalizedTag = tagName.trim();
         const tagKey = normalizedTag.toLowerCase();
-        let tagId = tagMap.get(tagKey);
+        let subId = subMap.get(tagKey);
 
-        if (!tagId) {
-            // Create Tag
-            console.log(`      Creating new tag: ${normalizedTag}`);
-            const { data: newTag, error: newTagError } = await supabase
-                .from('tags')
+        if (!subId) {
+            // Create Subcategory
+            console.log(`      Creating new subcategory: ${normalizedTag}`);
+            const { data: newSub, error: newSubError } = await supabase
+                .from('subcategories')
                 .insert({ name: normalizedTag })
                 .select()
                 .single();
             
-            if (newTagError) {
-                // Handle concurrent creation race condition if necessary, or just log
-                console.error(`      ❌ Error creating tag ${normalizedTag}:`, newTagError.message);
-                // Try fetching again maybe? or Skip
-                // For simplified script, existingTags query happens once at start, so race condition possible if run in parallel.
-                // Assuming single run.
-                // Attempt to fetch if error was "duplicate key"
-                if (newTagError.code === '23505') { // Unique violation
-                    const { data: retryTag } = await supabase.from('tags').select('id').eq('name', normalizedTag).single();
-                    if (retryTag) tagId = retryTag.id;
+            if (newSubError) {
+                console.error(`      ❌ Error creating subcategory ${normalizedTag}:`, newSubError.message);
+                if (newSubError.code === '23505') { // Unique violation
+                    const { data: retrySub } = await supabase.from('subcategories').select('id').eq('name', normalizedTag).single();
+                    if (retrySub) subId = retrySub.id;
                 }
-            } else if (newTag) {
-                tagId = newTag.id;
-                tagMap.set(tagKey, newTag.id);
+            } else if (newSub) {
+                subId = newSub.id;
+                subMap.set(tagKey, newSub.id);
             }
         }
 
-        if (tagId !== undefined && tagId !== null && insertedRecipe) {
-            // Link Recipe to Tag
-            const { error: linkError } = await supabase.from('recipe_tags').insert({
+        if (subId !== undefined && subId !== null && insertedRecipe) {
+            // Link Recipe to Subcategory
+            const { error: linkError } = await supabase.from('recipe_subcategories').insert({
                 recipe_id: insertedRecipe.id,
-                tag_id: tagId
+                subcategory_id: subId
             });
             if (linkError) {
-                 // Ignore duplicate link errors
                  if (linkError.code !== '23505') {
-                    console.error(`      ❌ Error linking tag ${normalizedTag}:`, linkError.message);
+                    console.error(`      ❌ Error linking subcategory ${normalizedTag}:`, linkError.message);
                  }
             }
         }
