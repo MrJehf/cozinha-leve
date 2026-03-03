@@ -61,7 +61,7 @@ export default async function RecipePage({
 
   return (
     <div className="container mx-auto max-w-4xl pb-10">
-      <div className="sticky top-16 z-10 bg-cozinha-bg/95 p-4 backdrop-blur-sm">
+      <div className="sticky top-0 z-10 bg-cozinha-bg/95 p-4 backdrop-blur-sm">
         <Link href="/" className="inline-flex items-center gap-1 text-cozinha-text hover:text-cozinha-cta font-medium">
           <ChevronLeft size={20} />
           Voltar
