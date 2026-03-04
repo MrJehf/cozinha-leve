@@ -90,12 +90,12 @@ export default async function RecipePage({
           
           <div className="flex items-center justify-between border-y border-gray-200 py-4">
             <div className="flex gap-6">
-                <div className="flex items-center gap-2 text-cozinha-text font-medium">
-                <Clock className="text-cozinha-highlight" />
+                <div className="flex items-center gap-2 font-medium" style={{ color: '#8494FF' }}>
+                <Clock />
                 <span>{recipe.prep_time}</span>
                 </div>
-                <div className="flex items-center gap-2 text-cozinha-text font-medium">
-                <Flame className="text-cozinha-cta" />
+                <div className="flex items-center gap-2 font-medium" style={{ color: '#F47C7C' }}>
+                <Flame />
                 <span>{recipe.calories} kcal</span>
                 </div>
             </div>

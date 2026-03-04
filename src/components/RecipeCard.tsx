@@ -123,12 +123,12 @@ export default function RecipeCard({ recipe, isAdmin, isFavorite: initialIsFavor
               {recipe.subtitle}
             </p>
 
-            <div className="flex items-center gap-4 text-xs font-medium text-gray-400">
-              <div className="flex items-center gap-1">
+            <div className="flex items-center gap-4 text-xs font-medium">
+              <div className="flex items-center gap-1" style={{ color: '#8494FF' }}>
                 <Clock size={14} />
                 <span>{recipe.prep_time}</span>
               </div>
-               <div className="flex items-center gap-1">
+               <div className="flex items-center gap-1" style={{ color: '#F47C7C' }}>
                 <Flame size={14} />
                 <span>{recipe.calories} kcal</span>
               </div>
