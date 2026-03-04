@@ -1,6 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import LogoutButton from './LogoutButton'
+import EditNameForm from './EditNameForm'
+import Link from 'next/link'
+import { KeyRound, ChevronRight } from 'lucide-react'
 
 export default async function PerfilPage() {
   const supabase = await createClient()
@@ -23,15 +26,12 @@ export default async function PerfilPage() {
       </h1>
 
       <div className="rounded-2xl bg-white p-8 shadow-lg ring-1 ring-black/5">
-        {/* Avatar */}
+        {/* User info header */}
         <div className="flex flex-col items-center mb-6">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-cozinha-soft text-4xl mb-3">
-            👤
-          </div>
           <h2 className="text-xl font-bold text-cozinha-text">
             {profile?.full_name || 'Usuário'}
           </h2>
-          <p className="text-sm text-cozinha-text-secondary">
+          <p className="text-sm text-cozinha-text-secondary mt-1">
             {user.email}
           </p>
           {profile?.role && (
@@ -41,24 +41,43 @@ export default async function PerfilPage() {
           )}
         </div>
 
-        {/* Info */}
-        <div className="space-y-4 border-t border-gray-100 pt-6">
-          <div>
-            <p className="text-xs text-cozinha-text-secondary uppercase tracking-wider mb-1">
-              E-mail
-            </p>
-            <p className="text-cozinha-text font-medium">{user.email}</p>
-          </div>
-          {profile?.full_name && (
+        {/* Account Settings */}
+        <div className="border-t border-gray-100 pt-6">
+          <h3 className="text-xs text-cozinha-text-secondary uppercase tracking-wider mb-4 font-semibold">
+            Configurações da Conta
+          </h3>
+
+          <div className="space-y-5">
+            {/* Edit Name */}
+            <EditNameForm currentName={profile?.full_name || ''} />
+
+            {/* Change Password */}
             <div>
               <p className="text-xs text-cozinha-text-secondary uppercase tracking-wider mb-1">
-                Nome
+                Senha
               </p>
-              <p className="text-cozinha-text font-medium">
-                {profile.full_name}
-              </p>
+              <Link
+                href="/perfil/alterar-senha"
+                className="flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3 transition hover:bg-gray-50 group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center rounded-lg bg-cozinha-cta/10 p-2">
+                    <KeyRound size={18} className="text-cozinha-cta" />
+                  </div>
+                  <span className="font-medium text-cozinha-text">Alterar senha</span>
+                </div>
+                <ChevronRight size={18} className="text-cozinha-text-secondary group-hover:text-cozinha-text transition" />
+              </Link>
             </div>
-          )}
+
+            {/* Email (read-only) */}
+            <div>
+              <p className="text-xs text-cozinha-text-secondary uppercase tracking-wider mb-1">
+                E-mail
+              </p>
+              <p className="text-cozinha-text font-medium">{user.email}</p>
+            </div>
+          </div>
         </div>
 
         {/* Logout */}

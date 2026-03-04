@@ -156,3 +156,72 @@ export async function updateUser(userId: string, data: { full_name?: string, rol
         return { success: false, error: error.message }
     }
 }
+
+// ─── Self-Service Actions (Authenticated User) ───────────────────────────────
+
+export async function updateOwnName(newName: string) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Não autenticado')
+
+    const trimmed = newName.trim()
+    if (trimmed.length < 2 || trimmed.length > 50) {
+      throw new Error('O nome deve ter entre 2 e 50 caracteres.')
+    }
+
+    // Update profile table
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ full_name: trimmed, updated_at: new Date().toISOString() })
+      .eq('id', user.id)
+
+    if (profileError) throw profileError
+
+    // Also update auth user_metadata for consistency
+    const { error: authError } = await supabase.auth.updateUser({
+      data: { full_name: trimmed }
+    })
+
+    if (authError) throw authError
+
+    revalidatePath('/perfil')
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
+
+export async function changeOwnPassword(currentPassword: string, newPassword: string) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user || !user.email) throw new Error('Não autenticado')
+
+    // Validate new password length
+    if (newPassword.length < 8) {
+      throw new Error('A nova senha deve ter pelo menos 8 caracteres.')
+    }
+
+    // Re-authenticate with current password to verify identity
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword,
+    })
+
+    if (signInError) {
+      throw new Error('Senha atual incorreta.')
+    }
+
+    // Update to the new password
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    })
+
+    if (updateError) throw updateError
+
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}

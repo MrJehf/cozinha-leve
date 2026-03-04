@@ -4,6 +4,7 @@ import { getFavorites } from '@/app/actions/favorite-actions'
 import RecipeCard from '@/components/RecipeCard'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import { Heart } from 'lucide-react'
 
 export default async function FavoritosPage() {
     const supabase = await createClient()
@@ -16,13 +17,19 @@ export default async function FavoritosPage() {
     const recipes = await getFavorites()
 
     return (
-        <div className="container mx-auto max-w-6xl px-4 py-8">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-cozinha-text mb-2">Meus Favoritos</h1>
-                <p className="text-gray-500">
+        <div className="container mx-auto max-w-7xl px-4 py-4">
+            <section className="mb-2 text-center">
+                <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-red-50 px-4 py-1.5 text-sm font-medium" style={{ color: '#F47C7C' }}>
+                    <Heart size={14} className="fill-current" />
+                    Suas receitas favoritas
+                </div>
+                <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-cozinha-text md:text-5xl lg:text-6xl">
+                    Meus <span style={{ color: '#F47C7C' }}>Favoritos</span>
+                </h1>
+                <p className="mx-auto mb-8 max-w-2xl text-lg text-gray-600">
                     Receitas que você salvou para preparar depois.
                 </p>
-            </div>
+            </section>
 
             {recipes.length > 0 ? (
                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
