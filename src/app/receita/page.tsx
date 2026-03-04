@@ -23,6 +23,7 @@ export default async function Home({
       .from('recipes')
       .select('*, categories(*), subcategories!inner(*)')
       .eq('subcategories.id', subcategory)
+      .order('is_highlight', { ascending: false })
       .order('created_at', { ascending: false })
   } else if (category) {
     // Filter by category only
@@ -30,12 +31,14 @@ export default async function Home({
       .from('recipes')
       .select('*, categories!inner(*), subcategories(*)')
       .eq('categories.id', category)
+      .order('is_highlight', { ascending: false })
       .order('created_at', { ascending: false })
   } else {
     // No filter — get all recipes with their categories and subcategories
     basicQuery = supabase
       .from('recipes')
       .select('*, categories(*), subcategories(*)')
+      .order('is_highlight', { ascending: false })
       .order('created_at', { ascending: false })
   }
 
