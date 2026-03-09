@@ -23,9 +23,10 @@ create table recipes (
 alter table profiles enable row level security;
 alter table recipes enable row level security;
 
--- Profiles: Users can read their own profile. Admin can read all.
-create policy "Public profiles are viewable by everyone." on profiles for select using (true);
+-- Profiles: Users can read/update their own profile. Admin operations use service_role (bypasses RLS).
+create policy "Users can read own profile" on profiles for select using (auth.uid() = id);
 create policy "Users can insert their own profile." on profiles for insert with check (auth.uid() = id);
+create policy "Users can update own profile" on profiles for update using (auth.uid() = id) with check (auth.uid() = id);
 
 -- Recipes: Public read access
 create policy "Recipes are viewable by everyone." on recipes for select using (true);
