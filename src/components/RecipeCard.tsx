@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Clock, Flame, Pencil, Trash2, Heart } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
-import { toggleFavorite, checkIsFavorite } from '@/app/actions/favorite-actions'
+import { toggleFavorite } from '@/app/actions/favorite-actions'
 
 // TODO: Define proper types
 import { Recipe } from '@/types'
@@ -22,22 +22,6 @@ export default function RecipeCard({ recipe, isAdmin, isFavorite: initialIsFavor
   const [loadingFav, setLoadingFav] = useState(false)
   const supabase = createClient()
   const router = useRouter()
-
-  useEffect(() => {
-    // Determine if we should check the status. 
-    // If it was passed as true, we assume it's true.
-    // If false, it might just be unknown/default.
-    // We can check to be sure, especially if we are in a list where we didn't pre-fetch user favorites.
-    const checkStatus = async () => {
-      // If we are admin, no need to check favorites
-      if (isAdmin) return
-      
-      const status = await checkIsFavorite(String(recipe.id))
-      setIsFavorite(status)
-    }
-
-    checkStatus()
-  }, [recipe.id, isAdmin])
 
   const handleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault()

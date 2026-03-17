@@ -87,3 +87,16 @@ export async function checkIsFavorite(recipeId: string) {
 
   return !!data
 }
+
+export async function getUserFavoriteIds(): Promise<string[]> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data } = await supabase
+    .from('favorites')
+    .select('recipe_id')
+    .eq('user_id', user.id)
+
+  return (data ?? []).map((f: any) => String(f.recipe_id))
+}

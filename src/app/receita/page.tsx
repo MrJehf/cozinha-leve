@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import RecipeCard from '@/components/RecipeCard'
 import SearchBar from '@/components/SearchBar'
 import CategoryFilter from '@/components/CategoryFilter'
+import { getUserFavoriteIds } from '@/app/actions/favorite-actions'
 import { Suspense } from 'react'
 
 export const revalidate = 60 // Revalidate every minute
@@ -50,6 +51,7 @@ export default async function Home({
   const { data: { user } } = await supabase.auth.getUser()
   
   let isAdmin = false
+  let favoriteIds: string[] = []
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
@@ -57,6 +59,7 @@ export default async function Home({
       .eq('id', user.id)
       .single()
     isAdmin = profile?.role === 'admin'
+    favoriteIds = await getUserFavoriteIds()
   }
 
   return (
@@ -89,7 +92,7 @@ export default async function Home({
       {recipes && recipes.length > 0 ? (
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} isAdmin={isAdmin} />
+            <RecipeCard key={recipe.id} recipe={recipe} isAdmin={isAdmin} isFavorite={favoriteIds.includes(String(recipe.id))} />
           ))}
         </div>
       ) : (
