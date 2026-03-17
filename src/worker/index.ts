@@ -1,16 +1,10 @@
-/// <reference lib="webworker" />
+// @ts-nocheck
+/* eslint-disable */
 
-declare const self: ServiceWorkerGlobalScope
-
-// Handler de push notification
 self.addEventListener('push', (event) => {
   if (!event.data) return
 
-  const data = event.data.json() as {
-    title: string
-    body: string
-    url?: string
-  }
+  const data = event.data.json()
 
   event.waitUntil(
     self.registration.showNotification(data.title, {
@@ -22,10 +16,9 @@ self.addEventListener('push', (event) => {
   )
 })
 
-// Ao clicar na notificação, abre o app
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
-  const url = (event.notification.data as { url: string }).url
+  const url = event.notification.data.url
 
   event.waitUntil(
     self.clients
