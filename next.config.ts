@@ -3,16 +3,15 @@ import withPWAInit from "@ducanh2912/next-pwa";
 
 const withPWA = withPWAInit({
   dest: "public",
-  disable: process.env.NODE_ENV === "development", // Disable PWA in dev mode
+  disable: process.env.NODE_ENV === "development",
   register: true,
   scope: "/",
   sw: "sw.js",
-  // Strategy: prompt for update (requires client-side logic handled by next-pwa or custom code)
-  // register: true,
+  customWorkerSrc: "worker",
 });
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  devIndicators: false,
 };
 
 export default withPWA(nextConfig);

@@ -35,7 +35,7 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname
 
-  // 1. Allow public access to login page
+  // 1. Permitir acesso público à página de login
   if (path === '/login') {
     if (user) {
       return NextResponse.redirect(new URL('/', request.url))
@@ -43,21 +43,32 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse
   }
 
-  // 2. Block unauthenticated access to everything else
+  // 2. Bloquear não autenticados
   if (!user) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // 3. Authenticated Logic
+  // 3. Lógica para usuários autenticados
 
-  // Root Redirect
+  // Busca perfil com campos de plano
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role, plan, expires_at')
+    .eq('id', user.id)
+    .single()
+
+  // Verificação de expiração (apenas usuários não-admin)
+  if (profile?.role !== 'admin' && !path.startsWith('/acesso-expirado')) {
+    if (profile?.expires_at) {
+      const expired = new Date(profile.expires_at) < new Date()
+      if (expired) {
+        return NextResponse.redirect(new URL('/acesso-expirado', request.url))
+      }
+    }
+  }
+
+  // Redirect da raiz
   if (path === '/') {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
     if (profile?.role === 'admin') {
       return NextResponse.redirect(new URL('/admin', request.url))
     } else {
@@ -65,14 +76,8 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // Admin Route Protection
+  // Proteção de rotas admin
   if (path.startsWith('/admin')) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
     if (profile?.role !== 'admin') {
       return NextResponse.redirect(new URL('/', request.url))
     }

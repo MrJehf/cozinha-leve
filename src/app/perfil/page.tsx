@@ -2,8 +2,15 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import LogoutButton from './LogoutButton'
 import EditNameForm from './EditNameForm'
+import PushNotifications from '@/components/PushNotifications'
 import Link from 'next/link'
-import { KeyRound, ChevronRight } from 'lucide-react'
+import { KeyRound, ChevronRight, Clock } from 'lucide-react'
+
+function getDaysRemaining(expiresAt: string | null): number | null {
+  if (!expiresAt) return null
+  const diff = new Date(expiresAt).getTime() - Date.now()
+  return Math.ceil(diff / (1000 * 60 * 60 * 24))
+}
 
 export default async function PerfilPage() {
   const supabase = await createClient()
@@ -18,6 +25,10 @@ export default async function PerfilPage() {
     .select('*')
     .eq('id', user.id)
     .single()
+
+  const daysRemaining = getDaysRemaining(profile?.expires_at ?? null)
+  const isLifetime = profile?.plan === 'lifetime' || !profile?.expires_at
+  const isAdmin = profile?.role === 'admin'
 
   return (
     <div className="container mx-auto max-w-lg px-4 py-8">
@@ -36,10 +47,47 @@ export default async function PerfilPage() {
           </p>
           {profile?.role && (
             <span className="mt-2 inline-block rounded-full bg-cozinha-highlight/20 px-3 py-0.5 text-xs font-semibold text-cozinha-highlight">
-              {profile.role === 'admin' ? 'Administrador' : 'Cliente'}
+              {isAdmin ? 'Administrador' : 'Cliente'}
             </span>
           )}
         </div>
+
+        {/* Contador de acesso */}
+        {!isAdmin && (
+          <div className={`mb-6 rounded-xl px-4 py-3 flex items-center gap-3 ${
+            isLifetime
+              ? 'bg-green-50 border border-green-200'
+              : daysRemaining !== null && daysRemaining <= 3
+              ? 'bg-red-50 border border-red-200'
+              : 'bg-amber-50 border border-amber-200'
+          }`}>
+            <Clock size={18} className={
+              isLifetime ? 'text-green-600' :
+              daysRemaining !== null && daysRemaining <= 3 ? 'text-red-500' : 'text-amber-500'
+            } />
+            <div>
+              <p className={`text-sm font-semibold ${
+                isLifetime ? 'text-green-700' :
+                daysRemaining !== null && daysRemaining <= 3 ? 'text-red-600' : 'text-amber-700'
+              }`}>
+                {isLifetime
+                  ? 'Acesso vitalício'
+                  : daysRemaining !== null && daysRemaining > 0
+                  ? `${daysRemaining} ${daysRemaining === 1 ? 'dia restante' : 'dias restantes'}`
+                  : 'Acesso expirado'}
+              </p>
+              <p className="text-xs text-cozinha-text-secondary mt-0.5">
+                {isLifetime
+                  ? 'Você tem acesso completo para sempre'
+                  : daysRemaining !== null && daysRemaining <= 3 && daysRemaining > 0
+                  ? 'Seu acesso está quase no fim. Renove agora!'
+                  : daysRemaining !== null && daysRemaining > 0
+                  ? 'Aproveite todas as receitas enquanto seu acesso é válido'
+                  : ''}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Account Settings */}
         <div className="border-t border-gray-100 pt-6">
@@ -69,6 +117,11 @@ export default async function PerfilPage() {
                 <ChevronRight size={18} className="text-cozinha-text-secondary group-hover:text-cozinha-text transition" />
               </Link>
             </div>
+
+            {/* Push Notifications (apenas para não-admin e não-vitalício) */}
+            {!isAdmin && !isLifetime && (
+              <PushNotifications />
+            )}
 
             {/* Email (read-only) */}
             <div>
