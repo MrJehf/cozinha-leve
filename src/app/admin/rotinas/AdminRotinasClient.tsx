@@ -91,7 +91,7 @@ export default function AdminRotinasClient({ rows }: { rows: RotinasRow[] }) {
                     <td className="px-4 py-3 text-cozinha-text-secondary">{dataFormatada}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
-                        {temPlano && (
+                        {Boolean(temPlano) && (
                           <button
                             onClick={() => abrirModal('plano', row.rotina_plano, nome)}
                             className="flex items-center gap-1 rounded-lg bg-cozinha-highlight/15 px-3 py-1.5 text-xs font-medium text-cozinha-highlight hover:bg-cozinha-highlight/25 transition"
@@ -100,7 +100,7 @@ export default function AdminRotinasClient({ rows }: { rows: RotinasRow[] }) {
                             Ver plano
                           </button>
                         )}
-                        {row.rotina_form_data && (
+                        {Boolean(row.rotina_form_data) && (
                           <button
                             onClick={() => abrirModal('form', row.rotina_form_data, nome)}
                             className="flex items-center gap-1 rounded-lg bg-cozinha-soft px-3 py-1.5 text-xs font-medium text-cozinha-cta hover:bg-cozinha-soft/70 transition"
