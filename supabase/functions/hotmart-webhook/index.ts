@@ -9,6 +9,8 @@ const PRODUCT_ID_KIDS_PDF = Deno.env.get('PRODUCT_ID_KIDS_PDF')!
 const PRODUCT_ID_UPSELL_ROTINA = Deno.env.get('PRODUCT_ID_UPSELL_ROTINA') ?? ''
 const VOXUY_WEBHOOK_URL = Deno.env.get('VOXUY_WEBHOOK_URL')!
 const VOXUY_TOKEN = Deno.env.get('VOXUY_TOKEN')!
+const VOXUY_PLAN_ID_LOW = Deno.env.get('VOXUY_PLAN_ID_LOW') ?? ''
+const VOXUY_PLAN_ID_LIFETIME = Deno.env.get('VOXUY_PLAN_ID_LIFETIME') ?? ''
 
 // Email via Resend (comentado até o domínio ser verificado)
 // const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
@@ -248,20 +250,28 @@ async function notifyVoxuy({
   magicLink: string | null
 }) {
   try {
+    const planId = plan === 'lifetime' ? VOXUY_PLAN_ID_LIFETIME : VOXUY_PLAN_ID_LOW
+
+    const body: Record<string, unknown> = {
+      apiToken: VOXUY_TOKEN,
+      planId,
+      paymentType: 99,
+      status: 99,
+      clientName: name,
+      clientEmail: email,
+      clientPhoneNumber: phone,
+      metadata: {
+        magic_link: magicLink ?? '',
+        plano: plan,
+      },
+    }
+
     const res = await fetch(VOXUY_WEBHOOK_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${VOXUY_TOKEN}`,
-      },
-      body: JSON.stringify({
-        name,
-        phone,
-        email,
-        plan,
-        magic_link: magicLink ?? '',
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
     })
+
     if (!res.ok) {
       console.error('Voxuy erro:', await res.text())
     }
