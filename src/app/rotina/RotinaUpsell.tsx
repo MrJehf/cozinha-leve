@@ -16,7 +16,7 @@ export default function RotinaUpsell() {
           Sua Rotina Personalizada
         </h1>
         <p className="text-cozinha-text-secondary leading-relaxed">
-          Um plano alimentar feito por IA exclusivamente para você — com base
+          Um plano alimentar feito por nossa nutricionista expert exclusivamente para você — com base
           no seu corpo, objetivos e estilo de vida.
         </p>
       </div>
@@ -32,7 +32,7 @@ export default function RotinaUpsell() {
             { icon: Utensils, text: 'Refeições práticas com alimentos do dia a dia' },
             { icon: Target, text: 'Calorias e macros calculados para o seu objetivo' },
             { icon: CheckCircle, text: 'Respeita suas restrições e preferências alimentares' },
-            { icon: Sparkles, text: 'Gerado por IA nutricionista especializada' },
+            { icon: Sparkles, text: 'Desenvolvido por nutricionista especializada' },
           ].map(({ icon: Icon, text }) => (
             <li key={text} className="flex items-start gap-3">
               <Icon size={18} className="mt-0.5 shrink-0 text-cozinha-highlight" />

@@ -297,7 +297,7 @@ export default function RotinaFormulario() {
 
         {loading && (
           <p className="text-center text-xs text-cozinha-text-secondary">
-            A IA está montando um plano personalizado só para você. Aguarde!
+            Nossa nutricionista está montando um plano personalizado só para você. Aguarde!
           </p>
         )}
       </form>
