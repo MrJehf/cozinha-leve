@@ -6,6 +6,7 @@ const HOTMART_HOTTOK = Deno.env.get('HOTMART_HOTTOK') ?? ''
 const PRODUCT_ID_LOW = Deno.env.get('PRODUCT_ID_LOW')!
 const PRODUCT_ID_LIFETIME = Deno.env.get('PRODUCT_ID_LIFETIME')!
 const PRODUCT_ID_KIDS_PDF = Deno.env.get('PRODUCT_ID_KIDS_PDF')!
+const PRODUCT_ID_UPSELL_ROTINA = Deno.env.get('PRODUCT_ID_UPSELL_ROTINA') ?? ''
 const VOXUY_WEBHOOK_URL = Deno.env.get('VOXUY_WEBHOOK_URL')!
 const VOXUY_TOKEN = Deno.env.get('VOXUY_TOKEN')!
 
@@ -66,6 +67,15 @@ Deno.serve(async (req) => {
   // Order bump Kids PDF
   if (productId === PRODUCT_ID_KIDS_PDF) {
     await handleKidsPdf({ email, name, phone })
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
+  // Upsell Rotina Personalizada
+  if (PRODUCT_ID_UPSELL_ROTINA && productId === PRODUCT_ID_UPSELL_ROTINA) {
+    await handleRotinaUpsell({ email, name, phone })
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
@@ -138,6 +148,28 @@ async function handleKidsPdf({
   await notifyVoxuy({ name, phone, email, plan: 'kids_pdf', magicLink: null })
 
   // await sendEmail({ name, email, plan: 'kids_pdf', magicLink: null })
+}
+
+async function handleRotinaUpsell({
+  email,
+  name,
+  phone,
+}: {
+  email: string
+  name: string
+  phone: string
+}) {
+  const { data: list } = await supabase.auth.admin.listUsers()
+  const user = list?.users?.find((u) => u.email === email)
+
+  if (user) {
+    await supabase
+      .from('profiles')
+      .update({ has_rotina: true })
+      .eq('id', user.id)
+  }
+
+  await notifyVoxuy({ name, phone, email, plan: 'rotina', magicLink: null })
 }
 
 async function upsertUser({

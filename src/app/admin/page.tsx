@@ -20,6 +20,9 @@ export default function AdminPage() {
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-3xl font-bold text-cozinha-text">Admin Dashboard</h1>
         <div className="flex items-center gap-4">
+          <a href="/admin/rotinas" className="text-sm font-medium text-cozinha-cta hover:text-cozinha-hover underline">
+            Rotinas
+          </a>
           <a href="/admin/users" className="text-sm font-medium text-cozinha-cta hover:text-cozinha-hover underline">
             Gerenciar Usuários
           </a>
