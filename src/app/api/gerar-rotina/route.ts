@@ -3,9 +3,11 @@ import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'
 import Anthropic from '@anthropic-ai/sdk'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-})
+const anthropic = process.env.ANTHROPIC_API_KEY 
+  ? new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    })
+  : null
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -45,6 +47,11 @@ export async function POST(request: NextRequest) {
 
   let plano: unknown
   try {
+    if (!anthropic) {
+      console.error('API Key da Anthropic não configurada')
+      return NextResponse.json({ error: 'Configuração da IA ausente' }, { status: 500 })
+    }
+
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 8192,

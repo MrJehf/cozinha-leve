@@ -11,7 +11,7 @@ export default function AcessoExpiradoPage() {
           do Cozinha Leve, renove seu acesso.
         </p>
         <a
-          href="https://pay.hotmart.com/seu-link-aqui"
+          href="https://pay.hotmart.com/N104950744U"
           className="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-full transition-colors text-sm"
         >
           Renovar acesso
