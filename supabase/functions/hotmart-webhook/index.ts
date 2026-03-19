@@ -254,7 +254,7 @@ async function notifyVoxuy({
 
     const body: Record<string, unknown> = {
       apiToken: VOXUY_TOKEN,
-      planId,
+      ...(planId ? { planId } : {}),
       paymentType: 99,
       status: 99,
       clientName: name,
