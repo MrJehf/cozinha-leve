@@ -35,7 +35,11 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname
 
-  // 1. Permitir acesso público à página de login
+  // 1. Permitir acesso público à página de login e callback de auth
+  if (path === '/auth/callback') {
+    return supabaseResponse
+  }
+
   if (path === '/login') {
     if (user) {
       return NextResponse.redirect(new URL('/', request.url))
